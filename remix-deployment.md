@@ -121,26 +121,82 @@ getAllKeysFor(0x1234...)
 getKeysPaginatedFor(0x1234..., 0, 10)
 ```
 
-## Step 8: Network-Specific Deployment
+## Step 8: Network Configuration
 
-### Ethereum Mainnet
+### Popular Networks (Pre-configured in MetaMask)
+
+#### Ethereum Mainnet
 - High gas costs (~$250+ for large values)
 - Use for high-value, permanent storage
 
-### Avalanche C-Chain
+#### Avalanche C-Chain
 - Much lower costs (~$1.20 for same storage)
 - Faster finality
 - Same contract works without changes
 
-### Polygon
+#### Polygon
 - Very low costs (~$0.10)
 - Good for testing and development
 
-### Testnets (Recommended for Testing)
+#### Testnets (Recommended for Testing)
 - **Goerli** (Ethereum testnet)
 - **Fuji** (Avalanche testnet)  
 - **Mumbai** (Polygon testnet)
 - Get free testnet tokens from faucets
+
+### Custom/Arbitrary EVM Blockchains
+
+**Remix works with ANY EVM-compatible blockchain!** To deploy on a custom network:
+
+#### Step 1: Add Custom Network to MetaMask
+1. Open MetaMask → Networks → "Add Network"
+2. Fill in the network details:
+   - **Network Name**: Your blockchain name
+   - **RPC URL**: Your blockchain's RPC endpoint
+   - **Chain ID**: Your blockchain's chain ID
+   - **Currency Symbol**: Native token symbol
+   - **Block Explorer URL**: (optional) Your block explorer
+
+#### Step 2: Get Native Tokens
+- Obtain the native cryptocurrency for gas fees
+- Bridge tokens if needed
+- Check with your blockchain provider for faucets (testnets)
+
+#### Step 3: Deploy via Remix
+1. Set Environment to **"Injected Provider - MetaMask"**
+2. MetaMask will show your custom network
+3. Deploy normally - the contract works on any EVM chain
+
+### Examples of Compatible Blockchains
+- **Binance Smart Chain (BSC)**
+- **Fantom Opera**
+- **Arbitrum** / **Optimism** (L2s)
+- **Harmony**
+- **Cronos**
+- **Moonbeam** / **Moonriver**
+- **Aurora** (NEAR EVM)
+- **Evmos**
+- **Canto**
+- **Private/Enterprise chains** (Hyperledger Besu, Geth, etc.)
+- **Local development networks** (Ganache, Hardhat Network)
+
+### Network-Specific Considerations
+
+#### Gas Costs Vary Dramatically
+- **Ethereum**: $1-500+ per transaction
+- **L2 solutions**: $0.01-5 per transaction  
+- **Alt-L1s**: $0.001-1 per transaction
+- **Private chains**: Often free or very low cost
+
+#### Block Times & Finality
+- **Ethereum**: ~12 seconds, 1-2 minutes for finality
+- **Avalanche**: Sub-second finality
+- **BSC**: ~3 seconds
+- **Polygon**: ~2 seconds
+
+#### Contract Size Limits
+- Most EVM chains: 24KB contract size limit
+- Some may have different limits - check documentation
 
 ## Troubleshooting
 
