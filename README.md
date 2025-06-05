@@ -11,6 +11,8 @@ A Solidity smart contract that provides a decentralized key-value storage system
 - **Read access**: Anyone can read from any namespace
 - **Event logging**: All state changes emit events
 - **Upgradeable**: Built with UUPS proxy pattern for future upgrades
+- **DoS protection**: Key/value length limits and paginated queries
+- **Storage gap**: Reserved slots for safe upgrades
 
 ## Contract Functions
 
@@ -23,8 +25,10 @@ A Solidity smart contract that provides a decentralized key-value storage system
 - `getFrom(address user, string key)` - Get a value from another user's namespace
 - `exists(string key)` - Check if a key exists in your namespace
 - `existsFor(address user, string key)` - Check if a key exists in another user's namespace
-- `getAllKeys()` - Get all keys in your namespace
-- `getAllKeysFor(address user)` - Get all keys in another user's namespace
+- `getAllKeys()` - Get all keys in your namespace (⚠️ gas warning for large sets)
+- `getAllKeysFor(address user)` - Get all keys in another user's namespace (⚠️ gas warning)
+- `getKeysPaginated(uint256 offset, uint256 limit)` - Get keys with pagination
+- `getKeysPaginatedFor(address user, uint256 offset, uint256 limit)` - Get keys with pagination for another user
 - `getKeyCount()` - Get the number of keys in your namespace
 - `getKeyCountFor(address user)` - Get the number of keys in another user's namespace
 
@@ -33,6 +37,12 @@ A Solidity smart contract that provides a decentralized key-value storage system
 - `ValueStored(address indexed user, string key, string value)` - Emitted when a new value is stored
 - `ValueUpdated(address indexed user, string key, string oldValue, string newValue)` - Emitted when a value is updated
 - `ValueDeleted(address indexed user, string key, string value)` - Emitted when a value is deleted
+- `ContractUpgraded(address indexed newImplementation)` - Emitted when contract is upgraded
+
+## Limits
+
+- **Maximum key length**: 256 bytes
+- **Maximum value length**: 8,192 bytes
 
 ## Installation
 

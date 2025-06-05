@@ -6,13 +6,15 @@ describe("KeyValueStore", function () {
   let owner;
   let user1;
   let user2;
+  let KeyValueStore;
 
   beforeEach(async function () {
     [owner, user1, user2] = await ethers.getSigners();
     
-    const KeyValueStore = await ethers.getContractFactory("KeyValueStore");
+    KeyValueStore = await ethers.getContractFactory("KeyValueStore");
     keyValueStore = await upgrades.deployProxy(KeyValueStore, [], {
       initializer: "initialize",
+      kind: "uups"
     });
     await keyValueStore.deployed();
   });
@@ -176,11 +178,9 @@ describe("KeyValueStore", function () {
   describe("Upgradeability", function () {
     it("Should allow owner to upgrade", async function () {
       const KeyValueStoreV2 = await ethers.getContractFactory("KeyValueStore");
-      const upgraded = await upgrades.upgradeProxy(
-        keyValueStore.address,
-        KeyValueStoreV2
-      );
-      expect(upgraded.address).to.equal(keyValueStore.address);
+      
+      await expect(upgrades.upgradeProxy(keyValueStore.address, KeyValueStoreV2))
+        .to.emit(keyValueStore, "ContractUpgraded");
     });
 
     it("Should preserve state after upgrade", async function () {
@@ -193,6 +193,67 @@ describe("KeyValueStore", function () {
       );
       
       expect(await upgraded.connect(user1).get("persistKey")).to.equal("persistValue");
+    });
+  });
+
+  describe("Length Limits", function () {
+    it("Should enforce key length limit", async function () {
+      const longKey = "a".repeat(257); // MAX_KEY_LENGTH + 1
+      await expect(
+        keyValueStore.connect(user1).set(longKey, "value")
+      ).to.be.revertedWith("Key too long");
+    });
+
+    it("Should enforce value length limit", async function () {
+      const longValue = "a".repeat(8193); // MAX_VALUE_LENGTH + 1
+      await expect(
+        keyValueStore.connect(user1).set("key", longValue)
+      ).to.be.revertedWith("Value too long");
+    });
+
+    it("Should accept maximum allowed lengths", async function () {
+      const maxKey = "a".repeat(256); // MAX_KEY_LENGTH
+      const maxValue = "b".repeat(8192); // MAX_VALUE_LENGTH
+      
+      await keyValueStore.connect(user1).set(maxKey, maxValue);
+      expect(await keyValueStore.connect(user1).get(maxKey)).to.equal(maxValue);
+    });
+  });
+
+  describe("Pagination", function () {
+    beforeEach(async function () {
+      // Add 10 keys for testing
+      for (let i = 0; i < 10; i++) {
+        await keyValueStore.connect(user1).set(`key${i}`, `value${i}`);
+      }
+    });
+
+    it("Should paginate keys correctly", async function () {
+      const [keys1, hasMore1] = await keyValueStore.connect(user1).getKeysPaginated(0, 5);
+      expect(keys1).to.have.lengthOf(5);
+      expect(hasMore1).to.be.true;
+      
+      const [keys2, hasMore2] = await keyValueStore.connect(user1).getKeysPaginated(5, 5);
+      expect(keys2).to.have.lengthOf(5);
+      expect(hasMore2).to.be.false;
+    });
+
+    it("Should handle offset beyond total keys", async function () {
+      const [keys, hasMore] = await keyValueStore.connect(user1).getKeysPaginated(20, 5);
+      expect(keys).to.have.lengthOf(0);
+      expect(hasMore).to.be.false;
+    });
+
+    it("Should handle limit exceeding remaining keys", async function () {
+      const [keys, hasMore] = await keyValueStore.connect(user1).getKeysPaginated(7, 10);
+      expect(keys).to.have.lengthOf(3);
+      expect(hasMore).to.be.false;
+    });
+
+    it("Should paginate for other users", async function () {
+      const [keys, hasMore] = await keyValueStore.connect(user2).getKeysPaginatedFor(user1.address, 0, 3);
+      expect(keys).to.have.lengthOf(3);
+      expect(hasMore).to.be.true;
     });
   });
 });
