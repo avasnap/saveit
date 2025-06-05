@@ -21,60 +21,91 @@ This guide walks you through deploying the upgradeable KeyValueStore contract us
 3. Once activated, you'll see the OpenZeppelin tab in the sidebar
 4. Click on it and install the contracts library
 
-## Step 3: Import Contract Files
+## Step 3: Choose Contract Version
 
-### Option A: Copy-Paste Method
-1. Create a new file: `contracts/KeyValueStore.sol`
-2. Copy the entire contents from your local `contracts/KeyValueStore.sol`
+We provide three contract versions:
+
+### Option A: KeyValueStoreBasic.sol (Recommended for Remix)
+- **Non-upgradeable** - Simpler deployment, no proxy needed
+- **Easiest to deploy** - Just click "Deploy" and it works
+- **All core features** - String storage, namespaces, pagination, length limits
+- **Best for most use cases**
+
+### Option B: KeyValueStoreSimple.sol (Upgradeable, Compatible)
+- **Upgradeable** - Can be updated after deployment
+- **Better Remix compatibility** - Uses `_unchained` initializers
+- **Requires proxy setup** - More complex deployment
+
+### Option C: KeyValueStore.sol (Full Featured)
+- **Production-ready** - All security features
+- **May have compatibility issues** with some Remix/OpenZeppelin versions
+
+## Step 4: Import Contract Files
+
+### Method 1: Copy-Paste (Recommended)
+1. Create a new file: `contracts/KeyValueStoreBasic.sol` (or your chosen version)
+2. Copy the entire contents from GitHub:
+   - Basic: `https://raw.githubusercontent.com/avasnap/saveit/main/contracts/KeyValueStoreBasic.sol`
+   - Simple: `https://raw.githubusercontent.com/avasnap/saveit/main/contracts/KeyValueStoreSimple.sol` 
+   - Full: `https://raw.githubusercontent.com/avasnap/saveit/main/contracts/KeyValueStore.sol`
 3. Paste into the Remix editor
 
-### Option B: Import from GitHub
+### Method 2: Import from GitHub
 1. In the File Explorer, right-click on `contracts` folder
 2. Select **"Import from GitHub"**
-3. Enter: `https://raw.githubusercontent.com/avasnap/saveit/main/contracts/KeyValueStore.sol`
+3. Enter the URL for your chosen contract version
 
-## Step 4: Compile the Contract
+## Step 5: Compile the Contract
 
 1. Go to the **Solidity Compiler** tab (second icon in sidebar)
 2. Set compiler version to `0.8.9` or higher
 3. Enable **Optimization** (200 runs recommended)
-4. Click **"Compile KeyValueStore.sol"**
+4. Click **"Compile"** your chosen contract
 5. Ensure compilation succeeds without errors
 
-## Step 5: Deploy the Proxy Contract
+## Step 6: Deploy the Contract
 
-⚠️ **Important**: This contract is upgradeable and requires special deployment steps.
+### For KeyValueStoreBasic (Recommended)
 
-### Deploy Implementation Contract
+**Simple deployment - no proxy needed!**
+
 1. Go to the **Deploy & Run Transactions** tab
-2. Set Environment to **"Injected Provider - MetaMask"** (or your preferred wallet)
+2. Set Environment to **"Injected Provider - MetaMask"**
 3. Select the correct network in MetaMask
-4. From the contract dropdown, select **"KeyValueStore"**
-5. Click **"Deploy"** (this deploys the implementation contract)
-6. **Save the implementation address** from the transaction
+4. From the contract dropdown, select **"KeyValueStoreBasic"**
+5. Click **"Deploy"**
+6. ✅ **Done!** Your contract is ready to use immediately
 
-### Deploy Proxy Contract
-Since Remix doesn't have built-in proxy deployment tools, you have two options:
+### For KeyValueStoreSimple/KeyValueStore (Upgradeable)
 
-#### Option A: Manual Proxy Deployment (Advanced)
-1. Deploy an ERC1967 proxy contract pointing to your implementation
-2. Call the `initialize()` function immediately after deployment
+⚠️ **Advanced**: These require proxy deployment
 
-#### Option B: Use OpenZeppelin Defender (Recommended)
+#### Option A: Use OpenZeppelin Defender (Recommended)
 1. Go to [OpenZeppelin Defender](https://defender.openzeppelin.com)
 2. Create an account and set up a deployment
 3. Use their UUPS proxy deployment tool
 4. Upload your compiled contract and deploy with initialization
 
-## Step 6: Verify Deployment
+#### Option B: Manual Deployment (Expert)
+1. Deploy the implementation contract first
+2. Deploy a UUPS proxy pointing to the implementation
+3. Call `initialize()` immediately after proxy deployment
+
+## Step 7: Verify Deployment
 
 After successful deployment:
 
-1. **Check Owner**: Call `owner()` function - should return your address
+### For KeyValueStoreBasic:
+1. **Test Basic Function**: Try calling `set("test", "value")` and then `get("test")`
+2. **Verify Events**: Check that `ValueStored` event was emitted
+3. **Check Owner**: Call `owner()` function - should return your address
+
+### For Upgradeable Versions:
+1. **Check Initialization**: Call `owner()` function - should return your address
 2. **Test Basic Function**: Try calling `set("test", "value")` and then `get("test")`
 3. **Verify Events**: Check that `ValueStored` event was emitted
 
-## Step 7: Contract Interaction
+## Step 8: Contract Interaction
 
 ### Writing Data
 ```solidity
