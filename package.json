@@ -1,0 +1,19 @@
+{
+  "name": "chainsave",
+  "version": "1.0.0",
+  "description": "On-chain key-value store smart contract",
+  "scripts": {
+    "test": "hardhat test",
+    "compile": "hardhat compile",
+    "deploy": "hardhat run scripts/deploy.js"
+  },
+  "devDependencies": {
+    "@nomicfoundation/hardhat-chai-matchers": "^1.0.0",
+    "@nomiclabs/hardhat-ethers": "^2.2.3",
+    "@openzeppelin/contracts-upgradeable": "^4.9.0",
+    "@openzeppelin/hardhat-upgrades": "^1.28.0",
+    "chai": "^4.3.10",
+    "ethers": "^5.7.0",
+    "hardhat": "^2.19.0"
+  }
+}
